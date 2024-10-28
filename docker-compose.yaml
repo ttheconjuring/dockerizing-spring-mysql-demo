@@ -1,0 +1,42 @@
+services:
+  mysql-db:
+    image: mysql
+    container_name: mysql
+    environment:
+      MYSQL_DATABASE: 'dock_app_db'
+      MYSQL_ROOT_PASSWORD: '1234'
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./data/conf.d:/etc/mysql/conf.d
+      - ./data/logs:/logs
+      - /usr/local/var/mysql:/var/lib/mysql
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -p$MYSQL_ROOT_PASSWORD"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  spring-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: spring
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-db:3306/dock_app_db?allowPublicKeyRetrieval=true&useSSL=false&connectTimeout=30000&socketTimeout=30000&autoReconnect=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=1234
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    networks:
+      - app-network
+    entrypoint: ["sh", "-c", "sleep 30 && java -jar /app.jar"]
+
+networks:
+  app-network:
+    driver: bridge

@@ -1,0 +1,23 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: dockerizing-app-demo
+
+  datasource:
+    driverClassName: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/dock_app_db?allowPublicKeyRetrieval=true&useSSL=false&connectTimeout=30000&socketTimeout=30000&autoReconnect=true
+    username: root
+    password: 1234
+
+  jpa:
+    properties:
+      hibernate.dialect: org.hibernate.dialect.MySQLDialect
+    hibernate:
+      ddl-auto: create-drop
+
+logging:
+  level:
+    org:
+      springframework: INFO
